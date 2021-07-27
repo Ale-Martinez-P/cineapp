@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<b:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:b="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/security 
+     http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<http auto-config="true">
+		<!--Declaramos todos los recursos que estaran protegidos -->
+		<intercept-url pattern="/peliculas/*"
+			access="hasAnyAuthority('EDITOR','GERENTE')" />
+		<intercept-url pattern="/horarios/*"
+			access="hasAnyAuthority('EDITOR','GERENTE')" />
+		<intercept-url pattern="/noticias/*"
+			access="hasAnyAuthority('EDITOR','GERENTE')" />
+		<intercept-url pattern="/banners/*"
+			access="hasAnyAuthority('GERENTE')" />
+
+		<form-login login-page="/formLogin"
+			default-target-url="/admin/index" />
+	</http>
+
+	<!-- Declaracion de usuarios en memoria <authentication-manager> <authentication-provider> 
+		<user-service> <user name="luis" password="{noop}luis123" authorities="EDITOR" 
+		/> <user name="admin" password="{noop}admin123" authorities="GERENTE" /> 
+		</user-service> </authentication-provider> </authentication-manager> -->
+	<!--Autenticacion desde una base de datos <authentication-manager> <authentication-provider> 
+		<jdbc-user-service data-source-ref="dataSource" /> </authentication-provider> 
+		</authentication-manager> -->
+	<!--Autenticacion desde una base de datos personalizada -->
+	<authentication-manager>
+		<authentication-provider>
+			<password-encoder ref="passwordEncoder" />
+			<jdbc-user-service data-source-ref="dataSource"
+				users-by-username-query="select cuenta,pwd,activo from Usuarios where cuenta = ?"
+				authorities-by-username-query="select cuenta,perfil from Perfiles where cuenta = ?" />
+		</authentication-provider>
+	</authentication-manager>
+
+	<b:bean id="passwordEncoder"
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+
+</b:beans>
